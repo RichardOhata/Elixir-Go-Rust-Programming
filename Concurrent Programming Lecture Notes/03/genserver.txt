@@ -1,0 +1,21 @@
+- To implement an OTP GenServer, we write a module containing callback
+  functions with standard names
+
+callback functions:                   common responses
+- init(init_arg)                      {:ok, state}
+- handle_call(request, from, state)   {:reply, reply, state}
+- handle_cast(request, state)         {:noreply, state}, {:stop, reason, state}
+- handle_info(msg, state)             {:noreply, state}
+- terminate(reason, state)
+- code_change(from_vsn, state, extra)
+- format_status(reason, [pdict, state])
+
+note: init/1 should run quickly; when more complex initialization is needed,
+      have the process sends itself a message during initialization
+
+GenServer provides functions that can used when implementing the client API:
+- start/start_link(module, init_arg, options \\ [])
+  * note: init_arg is passed to init callback
+- call(server, request, timeout \\ 5000)  # server can be name or pid
+- cast(server, request)
+- stop(server, reason \\ :normal, timeout \\ :infinity)

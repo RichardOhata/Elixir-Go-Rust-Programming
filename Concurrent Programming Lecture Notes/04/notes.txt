@@ -1,0 +1,32 @@
+- runtime errors: ERRORS, EXITS, THROWS
+  - raise("error")  # argument is typically a string; 
+                    # value is %RuntimeError{message: "error"}
+  - exit(reason)  # stops calling process with given reason
+    Process.exit(pid, reason) # sends exit signal
+	- throw(term): for non-local return
+  - try do
+      ...
+    catch type, value ->  # type can be :error, :exit, :throw
+      ...
+    after
+      ...  # always executed
+    end
+
+- processes can be linked (Process.link(other))
+- a process dies for a reason
+- when a process dies, it sends an exit signal containing the reason of its
+  death to its linked processes
+- a process can trap exit signals (Process.flag(:trap_exit, true))
+  * a trapped exit signal is transformed into a message in the mailbox
+- exit signals with reason :normal or :kill are special
+  * a :normal exit signal doesn't kill the receiving process
+  * a :kill exit signal cannot be trapped; the receiving process dies
+    with reason :killed
+  * for other exit signals, the process dies with the same reason if
+    it does not trap exit signals
+  note: the :kill signal can only be sent explicitly
+
+Some other useful functions related to processes:
+- Process.info(pid)  # all info
+- Process.info(pid, flag)  # flag: :trap_exit, :links, ...
+- Process.alive?(pid)

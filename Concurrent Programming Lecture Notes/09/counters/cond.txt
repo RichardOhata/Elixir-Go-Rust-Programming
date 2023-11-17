@@ -1,0 +1,10 @@
+- a condition variable is associated with a mutex
+
+- waiting for a condition
+  m - mutex, c - condition var
+ 
+  lock mutex                       lock mutex
+  while condition is false         condition = true
+    wait  (c.Wait())               signal condition  (c.Signal())
+  // do stuff                      unlock mutex
+  unlock mutex

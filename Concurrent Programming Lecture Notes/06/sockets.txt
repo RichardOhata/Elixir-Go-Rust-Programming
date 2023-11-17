@@ -1,0 +1,55 @@
+TCP
+---
+server:
+{:ok, socket}           = :gen_tcp.listen(port, opts)
+{:ok, connected_socket} = :gen_tcp.accept(socket)
+* note: when accept is issued, the values of the listening socket options are
+  inherited (in the above, connected_socket inherits the socket options of
+  socket)
+
+client:
+{:ok, socket} = :gen_tcp.connect(host, port, opts)
+* host should be an atom in Elixir
+
+:gen_tcp.send(socket, bin)
+:gen_tcp.close(socket)
+
+opts: 
+* server: [:binary, {:active, true/false}, {:packet, 0}, {:reuseaddr, true}]
+* client: [:binary, {:active, true/false}, {:packet, 0}]
+  note: {:active, true} is the default
+  note: :binary vs :list (received packet is delivered as a binary or a list;
+                          could be a charlist)
+
+2 ways to receive data:
+- active socket: received data is converted to a message & store in mailbox
+  of the accepting process: 
+  receive do
+   {:tcp, socket, bin} ->  ...
+   {:tcp_closed, socket} -> ...
+  end
+  * note: active socket provides no flow control; a fast sender can easily
+    overflow the receiver with incoming messages; use active mode only if your
+    high-level protocol provides its own flow control (for example,
+    acknowledging received messages) or the amount of data exchanged is small  
+
+- passive socket
+  {:ok, bin} | {:error, :closed} = :gen_tcp.recv(socket, nbytes)
+  # when nbytes is 0, read all available bytes
+
+Note: also {:active, :once} option
+
+UDP
+---
+{:ok, socket} = :gen_udp.open(port, opts)  # port 0 for ephemeral port
+                                           # :binary/:list
+                                           # active (default) vs passive
+:gen_udp.send(socket, host, port, bin)
+passive:
+  {:ok, bin} | {:error, :closed} = :gen_udp.recv(socket, nbytes)
+active:
+  receive do
+    {:udp, socket, host, port, bin} -> ...
+  end
+:gen_udp.close(socket)
+
